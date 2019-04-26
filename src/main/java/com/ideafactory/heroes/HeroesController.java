@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ideafactory.heroes.models.Hero;
 
 import java.util.List;
+import java.util.stream.*;
 
 /**
  * @author Aélion
@@ -46,23 +47,29 @@ public class HeroesController {
 		return hero;
 	}
 	
-	@PutMapping("/update")
-	public ArrayList<Hero> updateHero(@RequestBody Hero hero) {
-		int index = 0;
-		boolean found = false;
-		for (Hero storedHero : this.heroes) {
-			if (storedHero.getId() == hero.getId()) {
-				found = !found;
-				break;
-			}
-			index++;
+	@PostMapping("/add/heroes")
+	public ArrayList<Hero> addHeroes(@RequestBody Hero[] heroes) {
+		for(int i=0; i < heroes.length; i++) {
+			Hero hero = heroes[i];
+			hero.setId(this.heroes.size() > 0 ? this.heroes.size() + 1 : 1);
+			this.heroes.add(hero);
 		}
-		if (found) {
-			this.heroes.set(index, hero);
-		}
-		
 		return this.heroes;
 	}
+	
+	@PutMapping("/update")
+	public ResponseEntity<?> updateHero(@RequestBody Hero hero) {
+		Hero oldHero = this.findById(hero.getId());
+		int index = this.heroes.indexOf(oldHero);
+
+		if (index != -1) {
+			this.heroes.set(index, hero);
+			return new ResponseEntity<>(hero, HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(null, HttpStatus.NOT_MODIFIED);
+	}
+	
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<?> deleteHero(@PathVariable int id) {
 		Hero hero = this.findById(id);
@@ -76,19 +83,9 @@ public class HeroesController {
 	}
 	
 	private Hero findById(int id) {
-		int index = 0;
-		boolean found = false;
-		for (Hero storedHero : this.heroes) {
-			if (storedHero.getId() == id) {
-				found = !found;
-				break;
-			}
-			index++;
-		}
-		if (found) {
-			return this.heroes.get(index);
-		}
-		
-		return null;
+		return (Hero) this.heroes.stream()
+				.filter((obj) -> obj.getId() == id)
+				.findFirst()
+				.orElse(null);
 	}
 }
