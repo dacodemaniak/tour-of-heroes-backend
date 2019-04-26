@@ -3,21 +3,30 @@
  */
 package com.ideafactory.heroes.models;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+
+import javax.persistence.Id;
+
 /**
  * @author Aélion
  *
  */
+@Entity
 public class Hero {
-	private long id;
+	@Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+	private int id;
 	private String name;
 	private int lifePoints;
 	private int strength;
 	
 	public int getId() {
-		return (int) this.id;
+		return this.id;
 	}
 	
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	
