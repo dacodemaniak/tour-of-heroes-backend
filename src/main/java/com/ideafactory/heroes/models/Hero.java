@@ -14,7 +14,11 @@ public class Hero {
 	private int strength;
 	
 	public int getId() {
-		return (int) this.getId();
+		return (int) this.id;
+	}
+	
+	public void setId(long id) {
+		this.id = id;
 	}
 	
 	public String getName() {

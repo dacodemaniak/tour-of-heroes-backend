@@ -12,57 +12,81 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ideafactory.heroes.models.Hero;
+
+import java.util.List;
+
 /**
- * @author jean-luc
+ * @author Aélion
  *
  */
 @RequestMapping(path="/api/v1")
 @RestController
 public class HeroesController {
-	private ArrayList<String> heroes = new ArrayList<String>();
+	private ArrayList<Hero> heroes = new ArrayList<Hero>();
 	
 	public HeroesController() {
-		this.heroes.add("Superman");
-		this.heroes.add("Batman");
-		this.heroes.add("Spiderman");
 	}
 	
 	@GetMapping("/all")
-	public ArrayList<String> getAll() {
-		return this.heroes;
+	public @ResponseBody List<Hero> getAll() {
+		return (List<Hero>) this.heroes;
 	}
-	
-	@GetMapping("/add/{name}")
-	public String add(@PathVariable String name) {
-		this.heroes.add(name);
-		
-		return "Ajout terminé : " + this.heroes.size();
-	}
+
 	
 	@PostMapping("/add")
-	public String addHero(@RequestBody String hero) {
+	public String addHero(@RequestBody Hero hero) {
+		hero.setId(this.heroes.size() > 0 ? this.heroes.size() + 1 : 1);
 		this.heroes.add(hero);
 		
 		return "Ajout terminé (requestBody) : " + this.heroes.size();
 	}
 	
-	@PutMapping("/update/{oldHero}/{hero}")
-	public ArrayList<String> updateHero(@PathVariable String oldHero, @PathVariable String hero) {
-		int index = this.heroes.indexOf(oldHero);
-		this.heroes.set(index, hero);
-
+	@PutMapping("/update")
+	public ArrayList<Hero> updateHero(@RequestBody Hero hero) {
+		int index = 0;
+		boolean found = false;
+		for (Hero storedHero : this.heroes) {
+			if (storedHero.getId() == hero.getId()) {
+				found = !found;
+				break;
+			}
+			index++;
+		}
+		if (found) {
+			this.heroes.set(index, hero);
+		}
 		
 		return this.heroes;
 	}
-	@DeleteMapping("/delete/{name}")
-	public String deleteHero(@PathVariable String name) {
-		// Trouver le ou les héros dans la liste, et supprimer
-		if (this.heroes.contains(name)) {
-			this.heroes.remove(name);
+	@DeleteMapping("/delete/{id}")
+	public String deleteHero(@PathVariable int id) {
+		Hero hero = this.findById(id);
+		if (hero != null) {
+			this.heroes.remove(hero);
 			return "Suppression effectuée : " + this.heroes.size();
 		}
-		return "Le héro " + name + " n'a pas été trouvé";
+		
+		return "Le héro " + id + " n'a pas été trouvé";
+	}
+	
+	private Hero findById(int id) {
+		int index = 0;
+		boolean found = false;
+		for (Hero storedHero : this.heroes) {
+			if (storedHero.getId() == id) {
+				found = !found;
+				break;
+			}
+			index++;
+		}
+		if (found) {
+			return this.heroes.get(index);
+		}
+		
+		return null;
 	}
 }
