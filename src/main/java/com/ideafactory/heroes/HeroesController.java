@@ -29,8 +29,7 @@ import java.util.List;
 public class HeroesController {
 	private ArrayList<Hero> heroes = new ArrayList<Hero>();
 	
-	public HeroesController() {
-	}
+	public HeroesController() {}
 	
 	@GetMapping("/all")
 	public List<Hero> getAll() {
