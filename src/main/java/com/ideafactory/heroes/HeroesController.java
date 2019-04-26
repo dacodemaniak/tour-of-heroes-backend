@@ -5,6 +5,8 @@ package com.ideafactory.heroes;
 
 import java.util.ArrayList;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,17 +34,17 @@ public class HeroesController {
 	}
 	
 	@GetMapping("/all")
-	public @ResponseBody List<Hero> getAll() {
+	public List<Hero> getAll() {
 		return (List<Hero>) this.heroes;
 	}
 
 	
 	@PostMapping("/add")
-	public String addHero(@RequestBody Hero hero) {
+	public Hero addHero(@RequestBody Hero hero) {
 		hero.setId(this.heroes.size() > 0 ? this.heroes.size() + 1 : 1);
 		this.heroes.add(hero);
 		
-		return "Ajout terminé (requestBody) : " + this.heroes.size();
+		return hero;
 	}
 	
 	@PutMapping("/update")
@@ -63,14 +65,15 @@ public class HeroesController {
 		return this.heroes;
 	}
 	@DeleteMapping("/delete/{id}")
-	public String deleteHero(@PathVariable int id) {
+	public ResponseEntity<?> deleteHero(@PathVariable int id) {
 		Hero hero = this.findById(id);
 		if (hero != null) {
 			this.heroes.remove(hero);
-			return "Suppression effectuée : " + this.heroes.size();
+			return new ResponseEntity<>(hero, HttpStatus.OK);
+
 		}
 		
-		return "Le héro " + id + " n'a pas été trouvé";
+		return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 	}
 	
 	private Hero findById(int id) {
